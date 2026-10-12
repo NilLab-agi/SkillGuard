@@ -1,4 +1,4 @@
-"""the graph runs end to end over real fixtures"""
+"""the graph runs e2e over real fixtures"""
 
 from __future__ import annotations
 
