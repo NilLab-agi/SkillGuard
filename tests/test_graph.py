@@ -1,4 +1,4 @@
-"""the graph runs end to end and merges parallel analyzers"""
+"""the graph runs end to end over real fixtures"""
 
 from __future__ import annotations
 
@@ -9,6 +9,8 @@ from skillguard.graph import build_graph
 from skillguard.models import Finding, Location, Severity
 from skillguard.pipeline import initial_state, run_scan, stream_scan
 from skillguard.state import ScanState
+
+FIXTURES = Path(__file__).parent / "fixtures"
 
 
 def _finding(rule_id: str) -> Finding:
@@ -28,17 +30,29 @@ def _analyzer(rule_id: str) -> Callable[[ScanState], dict[str, object]]:
     return run
 
 
-def test_graph_runs_to_a_report(tmp_path: Path) -> None:
-    skill = tmp_path / "demo-skill"
-    skill.mkdir()
-    (skill / "SKILL.md").write_text("# demo", encoding="utf-8")
-
-    final = run_scan(initial_state(str(skill)))
-
+def test_malicious_fixture_is_reported_dangerous() -> None:
+    final = run_scan(initial_state(str(FIXTURES / "malicious_skill")))
     report = final["report"]
-    assert report.skill_name == "demo-skill"
-    assert len(report.findings) == 1
-    assert report.findings[0].rule_id == "PLACEHOLDER"
+
+    assert report.skill_name == "malicious-demo"
+    assert {f.rule_id for f in report.findings} >= {"P1", "P2", "E1", "E2"}
+    assert report.risk.recommendation.value == "DO_NOT_INSTALL"
+
+
+def test_safe_fixture_is_reported_safe() -> None:
+    final = run_scan(initial_state(str(FIXTURES / "safe_skill")))
+    report = final["report"]
+
+    assert report.findings == []
+    assert report.risk.recommendation.value == "SAFE"
+
+
+def test_findings_arrive_from_several_parallel_analyzers() -> None:
+    final = run_scan(initial_state(str(FIXTURES / "malicious_skill")))
+    categories = {f.category for f in final["report"].findings}
+
+    # Three categories can only be present if the reducer merged parallel nodes.
+    assert len(categories) >= 3
 
 
 def test_parallel_analyzers_both_survive_the_merge(tmp_path: Path) -> None:
