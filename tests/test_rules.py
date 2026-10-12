@@ -90,10 +90,17 @@ def test_rule_ids_are_unique() -> None:
     assert len(ids) == len(set(ids))
 
 
+# def test_every_category_has_rules_and_a_node() -> None:
+#     assert len(ANALYZER_NODES) == len(CATEGORIES)
+#     for category in CATEGORIES:
+#         assert rules_for(category), f"no rules registered for {category}"
+
+
 def test_every_category_has_rules_and_a_node() -> None:
-    assert len(ANALYZER_NODES) == len(CATEGORIES)
     for category in CATEGORIES:
         assert rules_for(category), f"no rules registered for {category}"
+    # every category node plus the structural AST node
+    assert "behavioral_ast" in ANALYZER_NODES
 
 
 @pytest.mark.parametrize(("rule_id", "text"), POSITIVE_CASES)

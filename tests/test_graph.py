@@ -80,3 +80,10 @@ def test_missing_directory_is_recorded_as_an_error(tmp_path: Path) -> None:
     final = run_scan(initial_state(str(tmp_path / "does-not-exist")))
 
     assert any("not a directory" in message for message in final["errors"])
+
+
+def test_malicious_fixture_includes_ast_findings() -> None:
+    final = run_scan(initial_state(str(FIXTURES / "malicious_skill")))
+    ids = {f.rule_id for f in final["report"].findings}
+
+    assert {"AST1", "AST8"} <= ids
