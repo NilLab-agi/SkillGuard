@@ -43,3 +43,11 @@ def iter_eligible_files(
     for path, text in context.file_cache.items():
         if not file_types or types.get(path, "other") in file_types:
             yield path, text
+
+
+def snippet_at_line(text: str, line: int, *, max_len: int = 160) -> str:
+    """Return the trimmed text of a 1 based line number"""
+    lines = text.splitlines()
+    if not 1 <= line <= len(lines):
+        return ""
+    return lines[line - 1].strip()[:max_len]
