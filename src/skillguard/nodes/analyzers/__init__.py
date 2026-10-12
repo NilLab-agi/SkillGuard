@@ -1,37 +1,47 @@
-"""Analyzer registry.
-
-An analyzer is a node function: ``state -> partial update``. Adding it to
-ANALYZER_NODES is all that is needed for the graph to run it in parallel
-with the other analyzers.
-"""
+"""Analyzer registry and the static analyzer nodes."""
 
 from __future__ import annotations
 
 from collections.abc import Callable
 
-from skillguard.models import Finding, Location, Severity
+from skillguard.nodes.analyzers import (
+    static_patterns_anti_refusal,
+    static_patterns_data_exfiltration,
+    static_patterns_privilege_escalation,
+    static_patterns_prompt_injection,
+    static_patterns_supply_chain,
+    static_patterns_trigger_abuse,
+)
+from skillguard.nodes.analyzers.static_runner import run_rules
 from skillguard.state import ScanState
 
-#: Signature every analyzer node must satisfy.
+#: Signature every analyzer node must satisfy
 AnalyzerFn = Callable[[ScanState], dict[str, object]]
 
-
-def static_placeholder(state: ScanState) -> dict[str, object]:
-    """Temporary analyzer that always reports one finding"""
-    return {
-        "findings": [
-            Finding(
-                rule_id="PLACEHOLDER",
-                category="placeholder",
-                severity=Severity.LOW,
-                message="Placeholder analyzer ran",
-                location=Location(file="SKILL.md", start_line=1),
-                snippet=str(state.get("skill_path", "")),
-            )
-        ]
-    }
+#: Importing these modules populated the rule registry
+_CATEGORY_MODULES = (
+    static_patterns_prompt_injection,
+    static_patterns_anti_refusal,
+    static_patterns_data_exfiltration,
+    static_patterns_privilege_escalation,
+    static_patterns_supply_chain,
+    static_patterns_trigger_abuse,
+)
 
 
+def _category_node(category: str) -> AnalyzerFn:
+    """Build the analyzer node that runs one rule category"""
+
+    def run(state: ScanState) -> dict[str, object]:
+        context = state.get("context")
+        if context is None:
+            return {"findings": []}
+        return {"findings": run_rules(context, category)}
+
+    return run
+
+
+# One parallel analyzer per category. Adding a key adds a graph node
 ANALYZER_NODES: dict[str, AnalyzerFn] = {
-    "static_placeholder": static_placeholder,
+    module.NODE_NAME: _category_node(module.CATEGORY) for module in _CATEGORY_MODULES
 }
