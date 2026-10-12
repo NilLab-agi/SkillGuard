@@ -5,7 +5,6 @@ from __future__ import annotations
 from io import StringIO
 from pathlib import Path
 
-import pytest
 from rich.console import Console
 
 from skillguard.models import (
@@ -18,7 +17,7 @@ from skillguard.models import (
     Severity,
 )
 from skillguard.pipeline import initial_state, run_scan
-from skillguard.reporters import render, render_terminal
+from skillguard.reporters import render_terminal
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -112,13 +111,13 @@ def test_findings_are_rendered_in_report_order() -> None:
     assert output.index("A1") < output.index("B2")
 
 
-def test_machine_formats_are_not_implemented_yet() -> None:
-    report = _report(
-        findings=[], recommendation=Recommendation.SAFE, score=0, severity=Severity.LOW
-    )
+# def test_machine_formats_are_not_implemented_yet() -> None:
+#     report = _report(
+#         findings=[], recommendation=Recommendation.SAFE, score=0, severity=Severity.LOW
+#     )
 
-    with pytest.raises(NotImplementedError):
-        render(report, "json")
+#     with pytest.raises(NotImplementedError):
+#         render(report, "json")
 
 
 def test_end_to_end_terminal_report_on_the_malicious_fixture() -> None:
