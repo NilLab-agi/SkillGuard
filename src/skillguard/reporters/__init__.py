@@ -11,7 +11,8 @@ TERMINAL = "terminal"
 
 
 def render(report: Report, output_format: str = TERMINAL) -> str | None:
+
     if output_format == TERMINAL:
         render_terminal(report)
         return None
-    raise NotImplementedError(f"output format '{output_format}'")
+    raise NotImplementedError(f"output format '{output_format}' is added in Phase 8")
