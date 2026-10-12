@@ -1,4 +1,4 @@
-"""SkillGuard command-line interface"""
+"""SkillGuard command line interface"""
 
 from __future__ import annotations
 
@@ -7,15 +7,15 @@ from enum import StrEnum
 import typer
 from rich.console import Console
 from rich.panel import Panel
-from rich.table import Table
 
 from skillguard import __version__
 from skillguard.models import Report
 from skillguard.pipeline import initial_state, stream_scan
+from skillguard.reporters import render
 
 app = typer.Typer(
     name="skillguard",
-    help="Static security scanner for AI agent skills.",
+    help="Static security scanner for AI agent skills",
     no_args_is_help=True,
 )
 console = Console()
@@ -47,63 +47,19 @@ def main(
         help="Show the SkillGuard version and exit.",
     ),
 ) -> None:
-    """SkillGuard: scan untrusted agent skills before you install them."""
-
-
-def _render(report: Report) -> None:
-    console.print(
-        Panel.fit(f"[bold]{report.skill_name}[/]", title="SkillGuard", border_style="cyan")
-    )
-    summary = Table(show_header=False, box=None)
-    summary.add_row("Score", f"{report.risk.score}/100")
-    summary.add_row("Severity", report.risk.severity.value)
-    summary.add_row("Recommendation", report.risk.recommendation.value)
-    console.print(summary)
-
-    if report.components:
-        components = Table(title=f"Components ({len(report.components)})")
-        components.add_column("Path")
-        components.add_column("Type")
-        components.add_column("Lines", justify="right")
-        components.add_column("Exec", justify="center")
-        for component in report.components:
-            components.add_row(
-                component.path,
-                component.type,
-                str(component.lines),
-                "yes" if component.executable else "no",
-            )
-        console.print(components)
-
-    if not report.findings:
-        console.print("[green]No findings.[/]")
-        return
-
-    table = Table(title=f"Findings ({len(report.findings)})")
-    table.add_column("Rule", style="bold")
-    table.add_column("Severity")
-    table.add_column("Location")
-    table.add_column("Message")
-    for finding in report.findings:
-        table.add_row(
-            finding.rule_id,
-            finding.severity.value,
-            f"{finding.location.file}:{finding.location.start_line}",
-            finding.message,
-        )
-    console.print(table)
+    """SkillGuard: scan untrusted agent skills before you install them"""
 
 
 @app.command()
 def scan(
-    path: str = typer.Argument(..., help="Skill directory to scan."),
+    path: str = typer.Argument(..., help="Skill directory to scan"),
     output_format: OutputFormat = typer.Option(
         OutputFormat.terminal, "--format", "-f", help="Report format."
     ),
-    no_llm: bool = typer.Option(False, "--no-llm", help="Static analysis only."),
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="Print each node as it runs."),
+    no_llm: bool = typer.Option(False, "--no-llm", help="Static analysis only"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Print each node as it runs"),
 ) -> None:
-    """Scan a skill directory and print a risk report."""
+    """Scan a skill directory and print a risk report"""
     state = initial_state(
         path,
         output_format=output_format.value,
@@ -120,10 +76,14 @@ def scan(
             report = candidate
 
     if report is None:
-        console.print("[red]Scan failed: no report produced.[/]")
+        console.print("[red]Scan failed: no report produced[/]")
         raise typer.Exit(code=2)
 
-    _render(report)
+    try:
+        render(report, output_format.value)
+    except NotImplementedError as exc:
+        console.print(f"[red]{exc}[/]")
+        raise typer.Exit(code=2) from exc
 
 
 if __name__ == "__main__":
