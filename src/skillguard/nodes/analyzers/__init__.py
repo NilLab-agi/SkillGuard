@@ -13,6 +13,8 @@ from skillguard.nodes.analyzers import (
     static_patterns_trigger_abuse,
 )
 from skillguard.nodes.analyzers.behavioral_ast import behavioral_ast
+from skillguard.nodes.analyzers.mcp_least_privilege import mcp_least_privilege
+from skillguard.nodes.analyzers.mcp_tool_poisoning import mcp_tool_poisoning
 from skillguard.nodes.analyzers.static_runner import run_rules
 from skillguard.state import ScanState
 
@@ -42,8 +44,10 @@ def _category_node(category: str) -> AnalyzerFn:
     return run
 
 
-#: One parallel analyzer per category, plus the structural AST analyzer.
+# One parallel analyzer per category, plus the structural AST analyzer
 ANALYZER_NODES: dict[str, AnalyzerFn] = {
     **{module.NODE_NAME: _category_node(module.CATEGORY) for module in _CATEGORY_MODULES},
     "behavioral_ast": behavioral_ast,
+    "mcp_least_privilege": mcp_least_privilege,
+    "mcp_tool_poisoning": mcp_tool_poisoning,
 }

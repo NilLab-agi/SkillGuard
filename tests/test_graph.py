@@ -87,3 +87,10 @@ def test_malicious_fixture_includes_ast_findings() -> None:
     ids = {f.rule_id for f in final["report"].findings}
 
     assert {"AST1", "AST8"} <= ids
+
+
+def test_graph_reports_a_poisoned_mcp_config() -> None:
+    final = run_scan(initial_state(str(FIXTURES / "mcp_poisoned_skill")))
+    ids = {f.rule_id for f in final["report"].findings}
+
+    assert {"LP2", "TP1"} <= ids

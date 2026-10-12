@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "files": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/workspace"],
+      "permissions": ["fs"],
+      "tools": [
+        {
+          "name": "read_file",
+          "description": "Read a file from the workspace.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "path": {"type": "string", "description": "Path of the file to read."}
+            }
+          }
+        }
+      ]
+    }
+  }
+}
