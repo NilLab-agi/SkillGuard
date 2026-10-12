@@ -96,13 +96,12 @@ class RiskAssessment(BaseModel):
 
 
 class Report(BaseModel):
-    """The final artifact"""
-
     skill_name: str
-    source: str  # skill path or URL
-    scanned_at: str  # ISO 8601 timestamp
+    source: str
+    scanned_at: str
     components: list[Component] = Field(default_factory=list)
     findings: list[Finding] = Field(default_factory=list)
     risk: RiskAssessment
     has_executable_scripts: bool = False
+    llm_requested: bool = False
     scanner_version: str = SCANNER_VERSION
