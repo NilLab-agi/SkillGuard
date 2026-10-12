@@ -1,8 +1,9 @@
-"""SkillGuard command line interface"""
+"""SkillGuard command-line interface"""
 
 from __future__ import annotations
 
 from enum import StrEnum
+from pathlib import Path
 
 import typer
 from rich.console import Console
@@ -19,6 +20,9 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 console = Console()
+
+# Exit code 1 is also raised when a strict gate (--fail-on-findings) fires
+BLOCK_THRESHOLD = 50
 
 
 class OutputFormat(StrEnum):
@@ -50,14 +54,27 @@ def main(
     """SkillGuard: scan untrusted agent skills before you install them"""
 
 
+def _exit_code(report: Report, *, fail_on_findings: bool) -> int:
+    """0 = clean or caution, 1 = blocked. Errors exit 2 before this is reached"""
+    if fail_on_findings and report.findings:
+        return 1
+    return 1 if report.risk.score > BLOCK_THRESHOLD else 0
+
+
 @app.command()
 def scan(
-    path: str = typer.Argument(..., help="Skill directory to scan"),
+    path: str = typer.Argument(..., help="Skill directory to scan."),
     output_format: OutputFormat = typer.Option(
         OutputFormat.terminal, "--format", "-f", help="Report format."
     ),
-    no_llm: bool = typer.Option(False, "--no-llm", help="Static analysis only"),
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="Print each node as it runs"),
+    output: str | None = typer.Option(
+        None, "--output", "-o", help="Write the report to this file instead of stdout."
+    ),
+    no_llm: bool = typer.Option(False, "--no-llm", help="Static analysis only."),
+    fail_on_findings: bool = typer.Option(
+        False, "--fail-on-findings", help="Exit 1 if any finding is present."
+    ),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Print each node as it runs."),
 ) -> None:
     """Scan a skill directory and print a risk report"""
     state = initial_state(
@@ -68,22 +85,36 @@ def scan(
     )
 
     report: Report | None = None
+    errors: list[str] = []
     for node_name, update in stream_scan(state):
         if verbose:
             console.print(f"[green]OK[/] {node_name}")
         candidate = update.get("report")
         if isinstance(candidate, Report):
             report = candidate
+        node_errors = update.get("errors")
+        if isinstance(node_errors, list):
+            errors.extend(str(message) for message in node_errors)
 
-    if report is None:
-        console.print("[red]Scan failed: no report produced[/]")
+    # Fail closed: an input error must never look like a clean scan.
+    if errors:
+        for message in errors:
+            console.print(f"[red]error:[/] {message}")
         raise typer.Exit(code=2)
 
-    try:
-        render(report, output_format.value)
-    except NotImplementedError as exc:
-        console.print(f"[red]{exc}[/]")
-        raise typer.Exit(code=2) from exc
+    if report is None:
+        console.print("[red]Scan failed: no report produced.[/]")
+        raise typer.Exit(code=2)
+
+    rendered = render(report, output_format.value)
+    if rendered is not None:
+        if output:
+            Path(output).write_text(rendered, encoding="utf-8")
+        else:
+            # typer.echo, not console.print: JSON must not be read as Rich markup.
+            typer.echo(rendered)
+
+    raise typer.Exit(code=_exit_code(report, fail_on_findings=fail_on_findings))
 
 
 if __name__ == "__main__":
