@@ -19,6 +19,12 @@ MAX_FILES_DEFAULT: int = 5_000  # 500 files
 # Hard ceiling on untrusted input (URL downloads, archives, clones)
 MAX_INPUT_BYTES: int = 100 * 1024 * 1024  # 100 MiB
 
+# Hard ceiling on the number of entries in a single zip archive
+MAX_ZIP_MEMBERS: int = 10_000
+
+# Longest we will wait for a git clone before giving up
+GIT_CLONE_TIMEOUT_SECONDS: float = 60.0
+
 # Directories that never contain skill logic worth scanning
 IGNORE_DIRS: frozenset[str] = frozenset(
     {".git", ".venv", "venv", "node_modules", "__pycache__", ".mypy_cache", ".ruff_cache"}
