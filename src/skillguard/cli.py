@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import shutil
 from enum import StrEnum
 from pathlib import Path
 
@@ -86,35 +87,77 @@ def scan(
 
     report: Report | None = None
     errors: list[str] = []
-    for node_name, update in stream_scan(state):
-        if verbose:
-            console.print(f"[green]OK[/] {node_name}")
-        candidate = update.get("report")
-        if isinstance(candidate, Report):
-            report = candidate
-        node_errors = update.get("errors")
-        if isinstance(node_errors, list):
-            errors.extend(str(message) for message in node_errors)
+    cleanup_dir: str | None = None
 
-    # Fail closed: an input error must never look like a clean scan.
-    if errors:
-        for message in errors:
-            console.print(f"[red]error:[/] {message}")
-        raise typer.Exit(code=2)
+    try:
+        for node_name, update in stream_scan(state):
+            if verbose:
+                console.print(f"[green]OK[/] {node_name}")
+            candidate = update.get("report")
+            if isinstance(candidate, Report):
+                report = candidate
+            node_errors = update.get("errors")
+            if isinstance(node_errors, list):
+                errors.extend(str(message) for message in node_errors)
+            node_cleanup = update.get("cleanup_dir")
+            if isinstance(node_cleanup, str) and node_cleanup:
+                cleanup_dir = node_cleanup
 
-    if report is None:
-        console.print("[red]Scan failed: no report produced.[/]")
-        raise typer.Exit(code=2)
+        # Fail closed: an input error must never look like a clean scan
+        if errors:
+            for message in errors:
+                console.print(f"[red]error:[/] {message}")
+            raise typer.Exit(code=2)
 
-    rendered = render(report, output_format.value)
-    if rendered is not None:
-        if output:
-            Path(output).write_text(rendered, encoding="utf-8")
-        else:
-            # typer.echo, not console.print: JSON must not be read as Rich markup.
-            typer.echo(rendered)
+        if report is None:
+            console.print("[red]Scan failed: no report produced.[/]")
+            raise typer.Exit(code=2)
 
-    raise typer.Exit(code=_exit_code(report, fail_on_findings=fail_on_findings))
+        rendered = render(report, output_format.value)
+        if rendered is not None:
+            if output:
+                Path(output).write_text(rendered, encoding="utf-8")
+            else:
+                # typer.echo, not console.print: JSON must not be read as Rich markup.
+                typer.echo(rendered)
+
+        raise typer.Exit(code=_exit_code(report, fail_on_findings=fail_on_findings))
+    finally:
+        # Zip/git inputs live in a temp dir; remove it even on error or Ctrl-C
+        if cleanup_dir:
+            shutil.rmtree(cleanup_dir, ignore_errors=True)
+
+    # report: Report | None = None
+    # errors: list[str] = []
+    # for node_name, update in stream_scan(state):
+    #     if verbose:
+    #         console.print(f"[green]OK[/] {node_name}")
+    #     candidate = update.get("report")
+    #     if isinstance(candidate, Report):
+    #         report = candidate
+    #     node_errors = update.get("errors")
+    #     if isinstance(node_errors, list):
+    #         errors.extend(str(message) for message in node_errors)
+
+    # # Fail closed: an input error must never look like a clean scan.
+    # if errors:
+    #     for message in errors:
+    #         console.print(f"[red]error:[/] {message}")
+    #     raise typer.Exit(code=2)
+
+    # if report is None:
+    #     console.print("[red]Scan failed: no report produced.[/]")
+    #     raise typer.Exit(code=2)
+
+    # rendered = render(report, output_format.value)
+    # if rendered is not None:
+    #     if output:
+    #         Path(output).write_text(rendered, encoding="utf-8")
+    #     else:
+    #         # typer.echo, not console.print: JSON must not be read as Rich markup.
+    #         typer.echo(rendered)
+
+    # raise typer.Exit(code=_exit_code(report, fail_on_findings=fail_on_findings))
 
 
 if __name__ == "__main__":
