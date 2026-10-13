@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import tempfile
+import zipfile
 from pathlib import Path
 
 from typer.testing import CliRunner
@@ -100,3 +102,27 @@ def test_unknown_format_is_rejected() -> None:
     result = _invoke("scan", str(FIXTURES / "safe_skill"), "--format", "yaml")
 
     assert result.exit_code == 2
+
+
+def test_zip_scan_cleans_up_its_temp_directory(tmp_path: Path) -> None:
+    archive = tmp_path / "skill.zip"
+    with zipfile.ZipFile(archive, "w") as handle:
+        handle.writestr("SKILL.md", "---\nname: zip-demo\n---\n")
+    before = set(Path(tempfile.gettempdir()).glob("skillguard-zip-*"))
+
+    result = _invoke("scan", str(archive))
+
+    assert result.exit_code == 0
+    assert set(Path(tempfile.gettempdir()).glob("skillguard-zip-*")) == before
+
+
+def test_rejected_zip_exits_2(tmp_path: Path) -> None:
+    archive = tmp_path / "evil.zip"
+    with zipfile.ZipFile(archive, "w") as handle:
+        handle.writestr("../escape.txt", "pwned")
+
+    result = _invoke("scan", str(archive))
+
+    assert result.exit_code == 2
+    # Rich wraps at the console width, so compare whitespace-normalised text
+    assert "unsafe path in archive" in " ".join(result.stdout.split())
