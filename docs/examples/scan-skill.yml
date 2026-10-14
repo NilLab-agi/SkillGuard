@@ -1,0 +1,46 @@
+# Example: gate a skill repo in CI.
+#
+# Copy to .github/workflows/scan-skill.yml in the repo that holds your skill,
+# and set SKILL_PATH to the skill directory.
+name: Scan skill
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write # required for the SARIF upload
+    env:
+      SKILL_PATH: .
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: uv sync --all-extras
+
+      # 1. Produce SARIF first, and do not fail yet: the alerts should exist in
+      #    code scanning even when the gate below fails the build.
+      - name: Scan (SARIF)
+        run: uv run skillguard scan "$SKILL_PATH" --format sarif -o skillguard.sarif
+        continue-on-error: true
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: skillguard.sarif
+
+      # 2. The gate. Exits 1 when the score is above 50.
+      - name: Gate on the score
+        run: uv run skillguard scan "$SKILL_PATH" --format json -o skillguard.json
+
+      # 3. Optional: also fail on any finding at all, not just a high score.
+      # - name: Gate on any finding
+      #   run: uv run skillguard scan "$SKILL_PATH" --fail-on-findings

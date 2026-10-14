@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="SkillGuard architecture: one scan, one LangGraph run">
+<defs>
+<marker id="head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M 0 0 L 10 5 L 0 10 z" fill="#1e1e1e"/>
+</marker>
+<style>text { font-family: 'Segoe UI', Helvetica, Arial, sans-serif; }</style>
+</defs>
+<rect x="0" y="0" width="100%" height="100%" fill="#ffffff"/>
+<text x="165" y="37.0" font-size="22" fill="#1e1e1e">SkillGuard — one scan, one LangGraph run</text>
+<rect x="25.0" y="70.0" width="135.0" height="85.0" rx="12" fill="#a5d8ff" fill-opacity="1.0" stroke="#4a9eed" stroke-width="2" stroke-opacity="1.0"/>
+<text x="92.5" y="102.5" font-size="16" text-anchor="middle" dominant-baseline="middle" fill="#1e1e1e">Input</text>
+<text x="92.5" y="122.5" font-size="16" text-anchor="middle" dominant-baseline="middle" fill="#1e1e1e">dir · .md · .zip · git</text>
+<polyline points="160.0,112.0 190.0,112.0" fill="none" stroke="#1e1e1e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#head)"/>
+<rect x="185.0" y="70.0" width="135.0" height="85.0" rx="12" fill="#a5d8ff" fill-opacity="1.0" stroke="#4a9eed" stroke-width="2" stroke-opacity="1.0"/>
+<text x="252.5" y="102.5" font-size="16" text-anchor="middle" dominant-baseline="middle" fill="#1e1e1e">build_context</text>
+<text x="252.5" y="122.5" font-size="16" text-anchor="middle" dominant-baseline="middle" fill="#1e1e1e">walk · read · parse</text>
+<polyline points="320.0,112.0 350.0,112.0" fill="none" stroke="#1e1e1e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#head)"/>
+<rect x="345.0" y="70.0" width="210.0" height="85.0" rx="12" fill="#d0bfff" fill-opacity="1.0" stroke="#8b5cf6" stroke-width="2" stroke-opacity="1.0"/>
+<text x="450.0" y="102.5" font-size="16" text-anchor="middle" dominant-baseline="middle" fill="#1e1e1e">12 analyzers</text>
+<text x="450.0" y="122.5" font-size="16" text-anchor="middle" dominant-baseline="middle" fill="#1e1e1e">regex · AST · MCP · deps</text>
+<polyline points="555.0,112.0 585.0,112.0" fill="none" stroke="#1e1e1e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#head)"/>
+<rect x="580.0" y="70.0" width="180.0" height="85.0" rx="12" fill="#c3fae8" fill-opacity="1.0" stroke="#22c55e" stroke-width="2" stroke-opacity="1.0"/>
+<text x="670.0" y="102.5" font-size="16" text-anchor="middle" dominant-baseline="middle" fill="#1e1e1e">deduplicate</text>
+<text x="670.0" y="122.5" font-size="16" text-anchor="middle" dominant-baseline="middle" fill="#1e1e1e">+ baseline filter</text>
+<polyline points="670.0,155.0 670.0,245.0" fill="none" stroke="#1e1e1e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#head)"/>
+<rect x="585.0" y="245.0" width="170.0" height="85.0" rx="12" fill="#ffd8a8" fill-opacity="1.0" stroke="#f59e0b" stroke-width="2" stroke-opacity="1.0"/>
+<text x="670.0" y="277.5" font-size="16" text-anchor="middle" dominant-baseline="middle" fill="#1e1e1e">meta_analyzer</text>
+<text x="670.0" y="297.5" font-size="16" text-anchor="middle" dominant-baseline="middle" fill="#1e1e1e">--llm (opt-in)</text>
+<polyline points="585.0,287.0 555.0,287.0" fill="none" stroke="#1e1e1e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#head)"/>
+<rect x="385.0" y="245.0" width="175.0" height="85.0" rx="12" fill="#fff3bf" fill-opacity="1.0" stroke="#f59e0b" stroke-width="2" stroke-opacity="1.0"/>
+<text x="472.5" y="277.5" font-size="16" text-anchor="middle" dominant-baseline="middle" fill="#1e1e1e">score</text>
+<text x="472.5" y="297.5" font-size="16" text-anchor="middle" dominant-baseline="middle" fill="#1e1e1e">points ×1.3 · band</text>
+<polyline points="385.0,287.0 355.0,287.0" fill="none" stroke="#1e1e1e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#head)"/>
+<rect x="210.0" y="245.0" width="150.0" height="85.0" rx="12" fill="#b2f2bb" fill-opacity="1.0" stroke="#22c55e" stroke-width="2" stroke-opacity="1.0"/>
+<text x="285.0" y="267.5" font-size="16" text-anchor="middle" dominant-baseline="middle" fill="#1e1e1e">report</text>
+<text x="285.0" y="287.5" font-size="16" text-anchor="middle" dominant-baseline="middle" fill="#1e1e1e">terminal · JSON</text>
+<text x="285.0" y="307.5" font-size="16" text-anchor="middle" dominant-baseline="middle" fill="#1e1e1e">SARIF</text>
+<rect x="25.0" y="380.0" width="735.0" height="55.0" rx="12" fill="#fff3bf" fill-opacity="0.5" stroke="#f59e0b" stroke-width="1" stroke-opacity="0.5"/>
+<text x="392.5" y="407.5" font-size="14" text-anchor="middle" dominant-baseline="middle" fill="#1e1e1e">Network egress is opt-in (--osv, --llm). The model adds context; it never removes a finding.</text>
+</svg>
