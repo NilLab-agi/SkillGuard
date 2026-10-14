@@ -16,6 +16,9 @@ from skillguard.nodes.analyzers.behavioral_ast import behavioral_ast
 from skillguard.nodes.analyzers.mcp_least_privilege import mcp_least_privilege
 from skillguard.nodes.analyzers.mcp_tool_poisoning import mcp_tool_poisoning
 from skillguard.nodes.analyzers.static_runner import run_rules
+from skillguard.nodes.analyzers.supply_chain_dependencies import (
+    supply_chain_dependencies,
+)
 from skillguard.state import ScanState
 
 #: Signature every analyzer node must satisfy.
@@ -50,4 +53,5 @@ ANALYZER_NODES: dict[str, AnalyzerFn] = {
     "behavioral_ast": behavioral_ast,
     "mcp_least_privilege": mcp_least_privilege,
     "mcp_tool_poisoning": mcp_tool_poisoning,
+    "supply_chain_dependencies": supply_chain_dependencies,
 }

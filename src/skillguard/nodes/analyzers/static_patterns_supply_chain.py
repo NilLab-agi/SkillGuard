@@ -8,19 +8,6 @@ from skillguard.models import Severity
 from skillguard.nodes.analyzers.pattern_defaults import CODE_TYPES, rule
 
 rule(
-    id="SC1",
-    category="supply_chain",
-    severity=Severity.LOW,
-    message="Unpinned dependency",
-    # ^...$ with MULTILINE: a requirements line that is just a name, no version.
-    # [ \t]* (not \s*) so it can never swallow a newline.
-    pattern=re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*[ \t]*(?:#.*)?$", re.MULTILINE),
-    remediation="Pin dependencies to an exact version for reproducible installs.",
-    confidence=0.75,
-    file_types=frozenset({"requirements"}),
-)
-
-rule(
     id="SC2",
     category="supply_chain",
     severity=Severity.HIGH,
