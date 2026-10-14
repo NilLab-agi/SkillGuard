@@ -129,3 +129,20 @@ def test_llm_stage_runs_when_requested(tmp_path: Path) -> None:
     nodes = [name for name, _update in stream_scan(initial_state(str(skill), use_llm=True))]
 
     assert "meta_analyzer" in nodes
+
+
+def test_graph_reports_supply_chain_findings() -> None:
+    final = run_scan(initial_state(str(FIXTURES / "supply_chain_skill")))
+    ids = {f.rule_id for f in final["report"].findings}
+
+    assert {"SC1", "SC6", "SC10"} <= ids
+
+
+def test_graph_skips_osv_unless_requested(tmp_path: Path) -> None:
+    skill = tmp_path / "skill"
+    skill.mkdir()
+    (skill / "requirements.txt").write_text("pyyaml==5.3.1\n", encoding="utf-8")
+
+    final = run_scan(initial_state(str(skill)))
+
+    assert "SC4" not in {f.rule_id for f in final["report"].findings}

