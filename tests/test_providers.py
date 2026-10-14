@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import subprocess
+import sys
+
 from skillguard.config import Settings
 from skillguard.models import Finding, Location, Severity
 from skillguard.providers.base import Evidence, ReviewRequest
@@ -110,3 +113,31 @@ def test_is_configured_needs_a_key_or_a_base_url() -> None:
     assert not is_configured(Settings(api_key=None, base_url=None))
     assert is_configured(Settings(api_key="sk-test", base_url=None))
     assert is_configured(Settings(api_key=None, base_url="http://localhost:11434/v1"))
+
+
+def test_the_cli_imports_without_the_optional_llm_backend() -> None:
+    """The static scanner must work when the 'llm' extra is not installed.
+
+    The Docker image and a bare `pip install skillguard` both hit this: an
+    eager import of langchain_openai would break the whole CLI.
+    """
+    program = (
+        "import sys\n"
+        "sys.modules['langchain_openai'] = None  # make importing it raise\n"
+        "import skillguard.cli  # must not need it\n"
+        "from skillguard.providers.registry import build_reviewer\n"
+        "from skillguard.config import Settings\n"
+        "try:\n"
+        "    build_reviewer(Settings())\n"
+        "except RuntimeError as exc:\n"
+        "    assert 'llm' in str(exc)\n"
+        "else:\n"
+        "    raise AssertionError('expected a clear RuntimeError')\n"
+        "print('ok')\n"
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", program], capture_output=True, text=True, check=False
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "ok" in result.stdout
