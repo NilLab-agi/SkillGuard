@@ -140,3 +140,45 @@ def test_llm_review_is_opt_in(monkeypatch) -> None:  # noqa: ANN001
     assert result.exit_code == 0
     assert payload["metadata"]["llm_requested"] is True
     assert "llm_error" in payload["metadata"]
+
+
+def test_baseline_command_writes_a_file(tmp_path: Path) -> None:
+    target = tmp_path / ".skillguardignore"
+
+    result = _invoke("baseline", str(FIXTURES / "supply_chain_skill"), "-o", str(target))
+
+    assert result.exit_code == 0
+    text = target.read_text(encoding="utf-8")
+    assert "SC1 requirements.txt" in text
+    assert "SC6 requirements.txt" in text
+
+
+def test_baseline_then_scan_blocks_nothing(tmp_path: Path) -> None:
+    target = tmp_path / ".skillguardignore"
+    _invoke("baseline", str(FIXTURES / "supply_chain_skill"), "-o", str(target))
+
+    result = _invoke("scan", str(FIXTURES / "supply_chain_skill"), "--baseline", str(target))
+
+    assert result.exit_code == 0
+    assert "Suppressed by baseline" in result.stdout
+
+
+def test_baseline_only_suppresses_what_is_listed(tmp_path: Path) -> None:
+    target = tmp_path / ".skillguardignore"
+    target.write_text("SC1 requirements.txt\n", encoding="utf-8")
+
+    result = _invoke(
+        "scan",
+        str(FIXTURES / "supply_chain_skill"),
+        "--baseline",
+        str(target),
+        "--format",
+        "json",
+    )
+
+    payload = json.loads(result.stdout)
+    ids = {issue["id"] for issue in payload["issues"]}
+
+    assert "SC1" not in ids
+    assert "SC6" in ids
+    assert payload["metadata"]["suppressed"] == 2  # both SC1 findings

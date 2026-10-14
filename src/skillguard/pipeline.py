@@ -8,6 +8,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from typing import Any, cast
 
+from skillguard.baseline import Baseline
 from skillguard.graph import graph
 from skillguard.state import ScanState
 
@@ -21,6 +22,7 @@ def initial_state(
     use_llm: bool = False,
     use_osv: bool = False,
     verbose: bool = False,
+    baseline: Baseline | None = None,
 ) -> ScanState:
     """Seed the state. Reducer channels must start as lists, not be missing."""
     return ScanState(
@@ -29,6 +31,7 @@ def initial_state(
         use_llm=use_llm,
         use_osv=use_osv,
         verbose=verbose,
+        baseline=baseline,
         findings=[],
         errors=[],
     )

@@ -2,7 +2,7 @@
 
 Every value that flows through the pipeline is defined here once. Pydantic
 turns these type hints into runtime validation and free JSON serialization,
-which is what makes the report a contract instead of a printf.
+which is what makes the report a contract instead of a printf
 """
 
 from __future__ import annotations
@@ -106,4 +106,5 @@ class Report(BaseModel):
     has_executable_scripts: bool = False
     llm_requested: bool = False
     llm_error: str | None = None
+    suppressed_findings: list[Finding] = Field(default_factory=list)
     scanner_version: str = SCANNER_VERSION

@@ -44,6 +44,7 @@ def _metadata(report: Report) -> dict[str, Any]:
         "has_executable_scripts": report.has_executable_scripts,
         "scanner_version": report.scanner_version,
         "llm_requested": report.llm_requested,
+        "suppressed": len(report.suppressed_findings),
     }
     if report.llm_error:
         metadata["llm_error"] = report.llm_error

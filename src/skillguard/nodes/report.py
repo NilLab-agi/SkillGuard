@@ -38,6 +38,7 @@ def report_node(state: ScanState) -> dict[str, object]:
             has_executable_scripts=context.has_executable_scripts,
             llm_requested=bool(state.get("use_llm", False)),
             llm_error=state.get("llm_error"),
+            suppressed_findings=list(state.get("suppressed_findings", [])),
             scanner_version=SCANNER_VERSION,
         )
     }

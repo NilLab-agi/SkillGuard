@@ -77,6 +77,7 @@ def test_json_metadata_is_present() -> None:
         "has_executable_scripts": True,
         "scanner_version": SCANNER_VERSION,
         "llm_requested": False,
+        "suppressed": 0,
     }
 
 

@@ -117,10 +117,18 @@ def render_terminal(report: Report, *, console: Console | None = None) -> None:
     if report.components:
         out.print(_components(report))
 
-    if not report.findings:
+    if report.findings:
+        out.print(f"\n[bold]Findings ({len(report.findings)})[/]")
+        for index, finding in enumerate(report.findings, start=1):
+            out.print(_finding_panel(finding, report, index))
+    else:
         out.print("[green]No findings.[/]")
-        return
 
-    out.print(f"\n[bold]Findings ({len(report.findings)})[/]")
-    for index, finding in enumerate(report.findings, start=1):
-        out.print(_finding_panel(finding, report, index))
+    if report.suppressed_findings:
+        out.print(f"\n[dim]Suppressed by baseline ({len(report.suppressed_findings)})[/]")
+        for finding in report.suppressed_findings:
+            out.print(
+                f"[dim]  {finding.rule_id}  "
+                f"{finding.location.file}:{finding.location.start_line}  "
+                f"{finding.message}[/]"
+            )

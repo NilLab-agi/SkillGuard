@@ -48,7 +48,8 @@
     "metadata": {
       "has_executable_scripts": true,
       "scanner_version": "0.1.0",
-      "llm_requested": false
+      "llm_requested": false,
+      "suppressed": 0
     }
   }
   '''

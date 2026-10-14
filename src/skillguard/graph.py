@@ -9,6 +9,7 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
 from skillguard.nodes.analyzers import ANALYZER_NODES, AnalyzerFn
+from skillguard.nodes.apply_baseline import apply_baseline
 from skillguard.nodes.build_context import build_context
 from skillguard.nodes.deduplicate import deduplicate
 from skillguard.nodes.meta_analyzer import meta_analyzer
@@ -45,6 +46,7 @@ def build_graph(
     for name, fn in registry.items():
         builder.add_node(name, fn)  # type: ignore[arg-type]  # langgraph node union: mypy cannot infer NodeInputT
     builder.add_node("deduplicate", deduplicate)
+    builder.add_node("apply_baseline", apply_baseline)
     builder.add_node("meta_analyzer", meta_analyzer)
     builder.add_node("score", score_node)
     builder.add_node("report", report_node)
@@ -58,9 +60,9 @@ def build_graph(
         builder.add_edge("build_context", name)
         builder.add_edge(name, "deduplicate")
 
-    # Conditional edge: --no-llm skips the LLM stage entirely.
+    builder.add_edge("deduplicate", "apply_baseline")
     builder.add_conditional_edges(
-        "deduplicate",
+        "apply_baseline",
         should_run_llm,
         {"llm": "meta_analyzer", "skip": "score"},
     )
