@@ -7,7 +7,7 @@ runtime lives in constants.py.
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -30,6 +30,15 @@ class Settings(BaseSettings):
     base_url: str | None = None
     api_key: SecretStr | None = None
     llm_timeout: float = Field(default=30.0, gt=0)
+    #: How the model is forced to answer with the verdict schema. Most
+    #: non-OpenAI endpoints support tool calls but not OpenAI's strict
+    #: json_schema mode, so function_calling is the portable default.
+    llm_structured_method: Literal["function_calling", "json_mode", "json_schema"] = (
+        "function_calling"
+    )
+    #: Extra JSON merged into every request body. Provider switches live
+    #: here, e.g. DeepSeek: {"thinking": {"type": "disabled"}}
+    llm_extra_body: dict[str, Any] = Field(default_factory=dict)
 
     max_file_bytes: int = Field(default=MAX_FILE_BYTES_DEFAULT, gt=0)
     max_files: int = Field(default=MAX_FILES_DEFAULT, gt=0)
