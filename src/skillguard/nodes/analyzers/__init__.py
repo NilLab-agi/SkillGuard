@@ -20,6 +20,7 @@ from skillguard.nodes.analyzers.supply_chain_dependencies import (
     supply_chain_dependencies,
 )
 from skillguard.nodes.analyzers.supply_chain_files import supply_chain_files
+from skillguard.nodes.analyzers.supply_chain_osv import supply_chain_osv
 from skillguard.state import ScanState
 
 #: Signature every analyzer node must satisfy.
@@ -56,4 +57,5 @@ ANALYZER_NODES: dict[str, AnalyzerFn] = {
     "mcp_tool_poisoning": mcp_tool_poisoning,
     "supply_chain_dependencies": supply_chain_dependencies,
     "supply_chain_files": supply_chain_files,
+    "supply_chain_osv": supply_chain_osv,
 }

@@ -25,6 +25,8 @@ class ScanState(TypedDict, total=False):
     input_ref: str
     output_format: str
     use_llm: bool
+    use_osv: bool
+    verbose: bool
 
     # resolved context
     skill_path: str

@@ -72,6 +72,9 @@ def scan(
         None, "--output", "-o", help="Write the report to this file instead of stdout."
     ),
     no_llm: bool = typer.Option(False, "--no-llm", help="Static analysis only."),
+    osv: bool = typer.Option(
+        False, "--osv", help="Look up known vulnerabilities on osv.dev (network egress)."
+    ),
     fail_on_findings: bool = typer.Option(
         False, "--fail-on-findings", help="Exit 1 if any finding is present."
     ),
@@ -82,6 +85,7 @@ def scan(
         path,
         output_format=output_format.value,
         use_llm=not no_llm,
+        use_osv=osv,
         verbose=verbose,
     )
 

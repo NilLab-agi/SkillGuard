@@ -43,3 +43,6 @@ BYTECODE_DIRS: frozenset[str] = frozenset({"__pycache__"})
 
 # Reason recorded when a bytecode directory is pruned instead of scanned
 SHIPPED_BYTECODE_REASON: str = "shipped bytecode"
+
+# OSV.dev batch endpoint for live vulnerability lookups
+OSV_BATCH_URL: str = "https://api.osv.dev/v1/querybatch"

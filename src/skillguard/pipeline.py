@@ -19,6 +19,7 @@ def initial_state(
     *,
     output_format: str = "terminal",
     use_llm: bool = False,
+    use_osv: bool = False,
     verbose: bool = False,
 ) -> ScanState:
     """Seed the state. Reducer channels must start as lists, not be missing."""
@@ -26,7 +27,8 @@ def initial_state(
         input_ref=input_ref,
         output_format=output_format,
         use_llm=use_llm,
-        # verbose=verbose,
+        use_osv=use_osv,
+        verbose=verbose,
         findings=[],
         errors=[],
     )
