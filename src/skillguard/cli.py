@@ -71,7 +71,11 @@ def scan(
     output: str | None = typer.Option(
         None, "--output", "-o", help="Write the report to this file instead of stdout."
     ),
-    no_llm: bool = typer.Option(False, "--no-llm", help="Static analysis only."),
+    llm: bool = typer.Option(
+        False,
+        "--llm/--no-llm",
+        help="Review findings with a model. Sends file contents off-machine.",
+    ),
     osv: bool = typer.Option(
         False, "--osv", help="Look up known vulnerabilities on osv.dev (network egress)."
     ),
@@ -84,7 +88,7 @@ def scan(
     state = initial_state(
         path,
         output_format=output_format.value,
-        use_llm=not no_llm,
+        use_llm=llm,
         use_osv=osv,
         verbose=verbose,
     )

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
+from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
@@ -26,8 +27,16 @@ def should_run_llm(state: ScanState) -> str:
 ScanGraph = CompiledStateGraph[ScanState, None, ScanState, ScanState]
 
 
-def build_graph(*, analyzers: Mapping[str, AnalyzerFn] | None = None) -> ScanGraph:
-    """Compile the graph. Pass ``analyzers`` to swap the registry (tests do)"""
+def build_graph(
+    *,
+    analyzers: Mapping[str, AnalyzerFn] | None = None,
+    checkpointer: BaseCheckpointSaver | None = None,
+) -> ScanGraph:
+    """Compile the graph.
+
+    ``analyzers`` swaps the registry (tests do). ``checkpointer`` enables
+    persistence: with one, a scan can be inspected or resumed by thread id.
+    """
     registry = ANALYZER_NODES if analyzers is None else analyzers
     builder = StateGraph[ScanState, None, ScanState, ScanState](ScanState)
 
@@ -49,10 +58,6 @@ def build_graph(*, analyzers: Mapping[str, AnalyzerFn] | None = None) -> ScanGra
         builder.add_edge("build_context", name)
         builder.add_edge(name, "deduplicate")
 
-    # # builder.add_edge("deduplicate", "score")
-
-    # builder.add_edge("score", "report")
-    # builder.add_edge("report", END)
     # Conditional edge: --no-llm skips the LLM stage entirely.
     builder.add_conditional_edges(
         "deduplicate",
@@ -63,7 +68,7 @@ def build_graph(*, analyzers: Mapping[str, AnalyzerFn] | None = None) -> ScanGra
     builder.add_edge("score", "report")
     builder.add_edge("report", END)
 
-    return builder.compile()
+    return builder.compile(checkpointer=checkpointer)
 
 
 # Module level instance so `langgraph dev` and the CLI share one graph.

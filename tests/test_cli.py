@@ -69,7 +69,8 @@ def test_json_goes_to_stdout() -> None:
     assert result.exit_code == 0
     payload = json.loads(result.stdout)
     assert payload["skill"]["name"] == "safe-demo"
-    assert payload["metadata"]["llm_requested"] is True
+    # LLM review is opt-in: static-only is the default.
+    assert payload["metadata"]["llm_requested"] is False
 
 
 def test_json_written_to_a_file(tmp_path: Path) -> None:
