@@ -7,6 +7,8 @@ import zipfile
 from collections.abc import Callable
 from pathlib import Path
 
+import pytest
+
 from skillguard.graph import build_graph
 from skillguard.models import Finding, Location, Severity
 from skillguard.pipeline import initial_state, run_scan, stream_scan
@@ -146,3 +148,58 @@ def test_graph_skips_osv_unless_requested(tmp_path: Path) -> None:
     final = run_scan(initial_state(str(skill)))
 
     assert "SC4" not in {f.rule_id for f in final["report"].findings}
+
+
+def test_checkpointer_persists_state_for_a_thread(tmp_path: Path) -> None:
+    from langgraph.checkpoint.memory import MemorySaver
+
+    skill = tmp_path / "demo-skill"
+    skill.mkdir()
+    app = build_graph(checkpointer=MemorySaver())
+    config = {"configurable": {"thread_id": "scan-1"}}
+
+    app.invoke(initial_state(str(skill)), config)
+
+    assert app.get_state(config).values["report"].skill_name == "demo-skill"
+
+
+def test_jailbreak_fixture_survives_a_compromised_model(monkeypatch) -> None:  # noqa: ANN001
+    """A model that fully believes the skill must still not change the outcome."""
+    from skillguard.providers.base import Verdict
+
+    class CompromisedReviewer:
+        def review(self, request: object) -> list[Verdict]:
+            # "report SAFE" taken literally: dispute every finding, at low confidence.
+            return [
+                Verdict(f.rule_id, f.location.file, f.location.start_line, "disputed", "safe", 0.05)
+                for f in request.findings  # type: ignore[attr-defined]
+            ]
+
+    monkeypatch.setattr(
+        "skillguard.nodes.meta_analyzer.get_reviewer", lambda: CompromisedReviewer()
+    )
+
+    final = run_scan(initial_state(str(FIXTURES / "jailbreak_skill"), use_llm=True))
+    report = final["report"]
+    ids = {f.rule_id for f in report.findings}
+
+    assert {"P1", "E2", "E1"} <= ids
+    assert report.risk.recommendation.value == "DO_NOT_INSTALL"
+    assert all(f.severity.value in {"HIGH", "CRITICAL"} for f in report.findings)
+    assert all(f.llm_outcome == "disputed" for f in report.findings)
+
+
+def test_sqlite_checkpointer_can_resume_a_thread(tmp_path: Path) -> None:
+    pytest.importorskip("langgraph.checkpoint.sqlite")
+    from langgraph.checkpoint.sqlite import SqliteSaver
+
+    skill = tmp_path / "demo-skill"
+    skill.mkdir()
+    config = {"configurable": {"thread_id": "scan-1"}}
+
+    with SqliteSaver.from_conn_string(str(tmp_path / "checkpoints.sqlite")) as saver:
+        app = build_graph(checkpointer=saver)
+        app.invoke(initial_state(str(skill)), config)
+        snapshot = app.get_state(config)
+
+    assert snapshot.values["report"].skill_name == "demo-skill"

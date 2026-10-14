@@ -127,3 +127,16 @@ def test_rejected_zip_exits_2(tmp_path: Path) -> None:
     assert result.exit_code == 2
     # Rich wraps at the console width, so compare whitespace-normalised text
     assert "unsafe path in archive" in " ".join(result.stdout.split())
+
+
+def test_llm_review_is_opt_in(monkeypatch) -> None:  # noqa: ANN001
+    # No provider configured: the scan degrades instead of failing.
+    monkeypatch.setattr("skillguard.nodes.meta_analyzer.get_reviewer", lambda: None)
+    # low_risk_skill has a finding, so the LLM stage actually runs.
+    result = _invoke("scan", str(FIXTURES / "low_risk_skill"), "--format", "json", "--llm")
+
+    payload = json.loads(result.stdout)
+
+    assert result.exit_code == 0
+    assert payload["metadata"]["llm_requested"] is True
+    assert "llm_error" in payload["metadata"]
