@@ -37,3 +37,9 @@ SKILL_MANIFEST_NAME: str = "SKILL.md"
 EXECUTABLE_EXTENSIONS: frozenset[str] = frozenset(
     {".py", ".sh", ".bash", ".zsh", ".js", ".mjs", ".cjs", ".ts", ".rb", ".pl", ".ps1", ".bat"}
 )
+
+# Directories that hold compiled bytecode; shipping them is suspicious
+BYTECODE_DIRS: frozenset[str] = frozenset({"__pycache__"})
+
+# Reason recorded when a bytecode directory is pruned instead of scanned
+SHIPPED_BYTECODE_REASON: str = "shipped bytecode"

@@ -19,6 +19,7 @@ from skillguard.nodes.analyzers.static_runner import run_rules
 from skillguard.nodes.analyzers.supply_chain_dependencies import (
     supply_chain_dependencies,
 )
+from skillguard.nodes.analyzers.supply_chain_files import supply_chain_files
 from skillguard.state import ScanState
 
 #: Signature every analyzer node must satisfy.
@@ -54,4 +55,5 @@ ANALYZER_NODES: dict[str, AnalyzerFn] = {
     "mcp_least_privilege": mcp_least_privilege,
     "mcp_tool_poisoning": mcp_tool_poisoning,
     "supply_chain_dependencies": supply_chain_dependencies,
+    "supply_chain_files": supply_chain_files,
 }

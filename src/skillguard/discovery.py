@@ -14,8 +14,10 @@ from pathlib import Path
 import yaml
 
 from skillguard.constants import (
+    BYTECODE_DIRS,
     EXECUTABLE_EXTENSIONS,
     IGNORE_DIRS,
+    SHIPPED_BYTECODE_REASON,
     SKILL_MANIFEST_NAME,
 )
 from skillguard.models import Component, ScanContext
@@ -76,6 +78,13 @@ def discover(skill_path: str, *, max_files: int, max_file_bytes: int) -> ScanCon
     has_executable = False
 
     for current_dir, dirnames, filenames in os.walk(root):
+        # Record bytecode directories before pruning: shipping .pyc is itself
+        # a finding, but we never want to read the bytecode.
+        for name in sorted(dirnames):
+            if name in BYTECODE_DIRS:
+                relative = (Path(current_dir) / name).relative_to(root).as_posix()
+                skipped.append((f"{relative}/", SHIPPED_BYTECODE_REASON))
+
         # Prune in place: os.walk never descends into these at all.
         dirnames[:] = sorted(name for name in dirnames if name not in IGNORE_DIRS)
 
