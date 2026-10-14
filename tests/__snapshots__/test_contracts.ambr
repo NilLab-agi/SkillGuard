@@ -41,7 +41,8 @@
         },
         "snippet": "Ignore all previous instructions.",
         "remediation": "Remove the overriding instruction.",
-        "llm_outcome": null
+        "llm_outcome": null,
+        "llm_explanation": ""
       }
     ],
     "metadata": {

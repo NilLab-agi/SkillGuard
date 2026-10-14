@@ -30,15 +30,24 @@ def to_wire(report: Report) -> dict[str, Any]:
                 "snippet": finding.snippet,
                 "remediation": finding.remediation,
                 "llm_outcome": finding.llm_outcome,
+                "llm_explanation": finding.llm_explanation,
             }
             for finding in report.findings
         ],
-        "metadata": {
-            "has_executable_scripts": report.has_executable_scripts,
-            "scanner_version": report.scanner_version,
-            "llm_requested": report.llm_requested,
-        },
+        "metadata": _metadata(report),
     }
+
+
+def _metadata(report: Report) -> dict[str, Any]:
+    """The metadata block. ``llm_error`` appears only when there was one."""
+    metadata: dict[str, Any] = {
+        "has_executable_scripts": report.has_executable_scripts,
+        "scanner_version": report.scanner_version,
+        "llm_requested": report.llm_requested,
+    }
+    if report.llm_error:
+        metadata["llm_error"] = report.llm_error
+    return metadata
 
 
 def render_json(report: Report) -> str:
