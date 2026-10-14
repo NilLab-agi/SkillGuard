@@ -63,6 +63,7 @@ class Finding(BaseModel):
     confidence: float = Field(default=0.8, ge=0.0, le=1.0)
     remediation: str = ""  # what to do about it
     llm_outcome: str | None = None  # confirmed | disputed | unclear
+    llm_explanation: str = ""  # model supplied context, never a replacement
 
 
 class Component(BaseModel):
@@ -104,4 +105,5 @@ class Report(BaseModel):
     risk: RiskAssessment
     has_executable_scripts: bool = False
     llm_requested: bool = False
+    llm_error: str | None = None
     scanner_version: str = SCANNER_VERSION

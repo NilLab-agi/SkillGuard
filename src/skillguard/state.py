@@ -38,6 +38,7 @@ class ScanState(TypedDict, total=False):
     effective_findings: list[Finding]  # no reducer: deduplicate is sole writer
 
     # results
+    llm_error: str | None  # set when the LLM stage was requested but failed
     risk: RiskAssessment
     report: Report
     errors: Annotated[list[str], operator.add]

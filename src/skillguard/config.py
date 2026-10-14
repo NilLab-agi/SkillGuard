@@ -25,10 +25,11 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    provider: str = "openai"
-    model: str = "gpt-4o-mini"
+    provider: str = "deepseek"
+    model: str = "deepseek-flash"
     base_url: str | None = None
     api_key: SecretStr | None = None
+    llm_timeout: float = Field(default=30.0, gt=0)
 
     max_file_bytes: int = Field(default=MAX_FILE_BYTES_DEFAULT, gt=0)
     max_files: int = Field(default=MAX_FILES_DEFAULT, gt=0)

@@ -25,7 +25,9 @@ def clean_env(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_defaults_are_used_when_nothing_is_set(clean_env: None) -> None:
     settings = Settings()
-    assert settings.provider == "openai"
+    # These are the project defaults; pin them so a silent change is caught.
+    assert settings.provider == "deepseek"
+    assert settings.model == "deepseek-flash"
     assert settings.max_files > 0
 
 
