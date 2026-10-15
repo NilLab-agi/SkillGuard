@@ -1,4 +1,11 @@
-# SkillGuard
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/logo-dark.png">
+    <img src="docs/logo.png" alt="SkillGuard logo" width="180">
+  </picture>
+</p>
+
+<h1 align="center">SkillGuard</h1>
 
 **A static security scanner for AI-agent skills.** Point it at a skill and it
 answers one question: *is this safe to install?*
