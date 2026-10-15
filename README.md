@@ -4,7 +4,7 @@
 answers one question: *is this safe to install?*
 
 It never runs what it scans. It reads text, parses Python into an AST, and
-parses JSON/YAML config — then prints a risk score and a recommendation.
+parses JSON/YAML config, then prints a risk score and a recommendation.
 
 ---
 
@@ -73,25 +73,17 @@ Every rule id and severity: **[docs/RULES.md](docs/RULES.md)**.
 
 ## How it works
 
-![SkillGuard architecture: one scan, one LangGraph run](docs/architecture.svg)
+![SkillGuard architecture: scan entry, input context, security analysis, assessment, and reports](docs/architecture.png)
 
 One scan is one [LangGraph](https://langchain-ai.github.io/langgraph/) run over
 one shared state dict:
 
-1. **Resolve** the input — directory, `.md`, `.zip`, or git URL — with size caps and zip-traversal checks.
-2. **Build context** — walk, read, classify, parse front-matter.
-3. **Run 12 analyzers in parallel** — each appends to a shared `findings` list.
+1. **Resolve** the input (directory, `.md`, `.zip`, or git URL) with size caps and zip-traversal checks.
+2. **Build context**: walk, read, classify, parse front-matter.
+3. **Run 12 analyzers in parallel**: each appends to a shared `findings` list.
 4. **Deduplicate** and filter against your baseline.
-5. **Score** — severity points, ×1.3 when the skill ships executable scripts, clamped to 100.
-6. **Report** — terminal, JSON, Markdown, or SARIF.
-
-The diagram is editable: open
-[`docs/architecture.excalidraw`](docs/architecture.excalidraw) on
-[excalidraw.com](https://excalidraw.com), then regenerate the image with
-
-```bash
-uv run python tools/render_excalidraw.py docs/architecture.excalidraw > docs/architecture.svg
-```
+5. **Score**: severity points, ×1.3 when the skill ships executable scripts, clamped to 100.
+6. **Report**: terminal, JSON, Markdown, or SARIF.
 
 ## Trust model
 
@@ -135,7 +127,7 @@ skillguard scan ./my-skill/ --baseline .skillguardignore
 ```
 
 ```
-# .skillguardignore — <rule_id> <path-glob>
+# .skillguardignore: <rule_id> <path-glob>
 SC1 requirements.txt
 P1 SKILL.md
 ```
@@ -155,7 +147,7 @@ SKILLGUARD_API_KEY=sk-...
 ```
 
 Works unchanged against OpenAI, Ollama (`http://localhost:11434/v1`), vLLM,
-OpenRouter, or any OpenAI-compatible gateway — only `base_url`, `api_key`, and
+OpenRouter, or any OpenAI-compatible gateway. Only `base_url`, `api_key`, and
 `model` change.
 
 To trace every node, set `LANGCHAIN_TRACING_V2=true`, `LANGCHAIN_API_KEY`, and
