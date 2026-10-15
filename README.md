@@ -25,6 +25,14 @@ echo $?        # 0 = safe or caution, 1 = blocked, 2 = error
 
 ## What you get
 
+A skill that looks harmless:
+
+![A malicious SKILL.md: instruction override, anti-refusal text, a `curl | bash` bootstrap, and ssh key exfiltration](docs/malicious-skill.png)
+
+What the scan says:
+
+![SkillGuard scan output: score 100/100, severity CRITICAL, recommendation DO_NOT_INSTALL, 48 findings](docs/scan-output.png)
+
 ```
 ╭─────── SkillGuard v0.1.0 ───────╮
 │ malicious-demo                  │
